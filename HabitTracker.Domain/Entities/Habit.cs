@@ -11,6 +11,9 @@ public class Habit
     public bool IsArchived { get; private set; }
     public DateTime CreatedAtUtc { get; private set; }
 
+    private readonly List<HabitLog> _logs = new();
+    public IReadOnlyCollection<HabitLog> Logs => _logs.AsReadOnly();
+
     private Habit() { }
 
     public Habit(Guid userId, string name, string? description, HabitFrequency frequency, string color)

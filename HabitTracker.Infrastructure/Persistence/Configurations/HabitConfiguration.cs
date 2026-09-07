@@ -22,5 +22,10 @@ public class HabitConfiguration : IEntityTypeConfiguration<Habit>
             .HasMaxLength(20);
 
         builder.HasIndex(h => h.UserId);
+
+        builder.HasMany(h => h.Logs)
+            .WithOne()
+            .HasForeignKey(l => l.HabitId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

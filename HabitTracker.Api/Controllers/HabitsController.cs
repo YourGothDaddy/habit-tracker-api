@@ -2,9 +2,11 @@ namespace HabitTracker.Api.Controllers
 {
     using System.Security.Claims;
     using HabitTracker.Application.Habits.Commands.CreateHabit;
+    using HabitTracker.Application.Habits.Commands.LogHabit;
     using HabitTracker.Application.Habits.Dtos;
     using HabitTracker.Application.Habits.Queries.GetAllHabits;
     using HabitTracker.Application.Habits.Queries.GetHabitById;
+    using HabitTracker.Application.Habits.Queries.GetLogsForHabit;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
@@ -53,6 +55,24 @@ namespace HabitTracker.Api.Controllers
             var query = new GetAllHabitsQuery { UserId = GetCurrentUserId() };
             var habits = await _mediator.Send(query, cancellationToken);
             return Ok(habits);
+        }
+
+        [HttpPost("{habitId:guid}/logs")]
+        public async Task<ActionResult<Guid>> LogHabit(Guid habitId, LogHabitCommand command, CancellationToken cancellationToken)
+        {
+            command.HabitId = habitId;
+            command.UserId = GetCurrentUserId();
+
+            var logId = await _mediator.Send(command, cancellationToken);
+            return Ok(logId);
+        }
+
+        [HttpGet("{habitId:guid}/logs")]
+        public async Task<ActionResult<List<HabitLogDto>>> GetLogs(Guid habitId, CancellationToken cancellationToken)
+        {
+            var query = new GetLogsForHabitQuery { HabitId = habitId, UserId = GetCurrentUserId() };
+            var logs = await _mediator.Send(query, cancellationToken);
+            return Ok(logs);
         }
     }
 }

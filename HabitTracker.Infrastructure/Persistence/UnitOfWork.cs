@@ -10,9 +10,11 @@ public class UnitOfWork : IUnitOfWork
     {
         _context = context;
         Habits = new HabitRepository(context);
+        HabitLogs = new HabitLogRepository(context);
     }
 
     public IHabitRepository Habits { get; }
+    public IHabitLogRepository HabitLogs { get; }
 
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
     {
