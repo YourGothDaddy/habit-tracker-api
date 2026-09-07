@@ -45,6 +45,16 @@ public class Program
     });
         });
 
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("FrontendPolicy", policy =>
+            {
+                policy.WithOrigins("http://localhost:5173")
+                      .AllowAnyMethod()
+                      .AllowAnyHeader();
+            });
+        });
+
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -96,6 +106,7 @@ public class Program
         }
 
         app.UseHttpsRedirection();
+        app.UseCors("FrontendPolicy");
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
