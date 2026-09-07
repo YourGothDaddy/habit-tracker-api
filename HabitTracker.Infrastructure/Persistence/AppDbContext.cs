@@ -1,17 +1,23 @@
-﻿namespace HabitTracker.Infrastructure.Persistence;
-using HabitTracker.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-
-public class AppDbContext : DbContext
+﻿namespace HabitTracker.Infrastructure.Persistence
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-    {
-    }
-    public DbSet<Habit> Habits => Set<Habit>();
+    using HabitTracker.Domain.Entities;
+    using HabitTracker.Infrastructure.Identity;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore;
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-        base.OnModelCreating(modelBuilder);
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        {
+        }
+
+        public DbSet<Habit> Habits => Set<Habit>();
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+        }
     }
 }
