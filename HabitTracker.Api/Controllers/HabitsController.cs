@@ -5,10 +5,12 @@ namespace HabitTracker.Api.Controllers
     using HabitTracker.Application.Habits.Queries.GetAllHabits;
     using HabitTracker.Application.Habits.Queries.GetHabitById;
     using MediatR;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class HabitsController : ControllerBase
     {
         private readonly IMediator _mediator;
