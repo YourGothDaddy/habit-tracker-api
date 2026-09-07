@@ -1,5 +1,6 @@
 namespace HabitTracker.Api.Controllers
 {
+    using System.Security.Claims;
     using HabitTracker.Application.Habits.Commands.CreateHabit;
     using HabitTracker.Application.Habits.Dtos;
     using HabitTracker.Application.Habits.Queries.GetAllHabits;
@@ -20,9 +21,20 @@ namespace HabitTracker.Api.Controllers
             _mediator = mediator;
         }
 
+        private Guid GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? User.FindFirst("sub")?.Value
+                ?? throw new UnauthorizedAccessException("User id claim not found.");
+
+            return Guid.Parse(userIdClaim);
+        }
+
         [HttpPost]
         public async Task<ActionResult<Guid>> Create(CreateHabitCommand command, CancellationToken cancellationToken)
         {
+            command.UserId = GetCurrentUserId();
+
             var habitId = await _mediator.Send(command, cancellationToken);
             return CreatedAtAction(nameof(GetById), new { id = habitId }, habitId);
         }
@@ -35,9 +47,10 @@ namespace HabitTracker.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<HabitDto>>> GetAll([FromQuery] Guid userId, CancellationToken cancellationToken)
+        public async Task<ActionResult<List<HabitDto>>> GetAll(CancellationToken cancellationToken)
         {
-            var habits = await _mediator.Send(new GetAllHabitsQuery { UserId = userId }, cancellationToken);
+            var query = new GetAllHabitsQuery { UserId = GetCurrentUserId() };
+            var habits = await _mediator.Send(query, cancellationToken);
             return Ok(habits);
         }
     }
