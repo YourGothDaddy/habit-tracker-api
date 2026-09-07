@@ -42,7 +42,8 @@ namespace HabitTracker.Api.Controllers
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<HabitDto>> GetById(Guid id, CancellationToken cancellationToken)
         {
-            var habit = await _mediator.Send(new GetHabitByIdQuery { Id = id }, cancellationToken);
+            var query = new GetHabitByIdQuery { Id = id, UserId = GetCurrentUserId() };
+            var habit = await _mediator.Send(query, cancellationToken);
             return habit is null ? NotFound() : Ok(habit);
         }
 

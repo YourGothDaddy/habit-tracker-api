@@ -16,7 +16,13 @@
         public async Task<HabitDto?> Handle(GetHabitByIdQuery request, CancellationToken cancellationToken)
         {
             var habit = await _unitOfWork.Habits.GetByIdAsync(request.Id, cancellationToken);
-            return habit is null ? null : HabitDto.FromEntity(habit);
+
+            if (habit is null || habit.UserId != request.UserId)
+            {
+                return null;
+            }
+
+            return HabitDto.FromEntity(habit);
         }
     }
 }
