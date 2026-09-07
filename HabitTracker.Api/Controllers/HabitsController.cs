@@ -1,23 +1,42 @@
-namespace HabitTracker.Api.Controllers;
-using HabitTracker.Application.Habits.Commands.CreateHabit;
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
-
-[ApiController]
-[Route("api/[controller]")]
-public class HabitsController : ControllerBase
+namespace HabitTracker.Api.Controllers
 {
-    private readonly IMediator _mediator;
+    using HabitTracker.Application.Habits.Commands.CreateHabit;
+    using HabitTracker.Application.Habits.Dtos;
+    using HabitTracker.Application.Habits.Queries.GetAllHabits;
+    using HabitTracker.Application.Habits.Queries.GetHabitById;
+    using MediatR;
+    using Microsoft.AspNetCore.Mvc;
 
-    public HabitsController(IMediator mediator)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class HabitsController : ControllerBase
     {
-        _mediator = mediator;
-    }
+        private readonly IMediator _mediator;
 
-    [HttpPost]
-    public async Task<ActionResult<Guid>> Create(CreateHabitCommand command, CancellationToken cancellationToken)
-    {
-        var habitId = await _mediator.Send(command, cancellationToken);
-        return CreatedAtAction(nameof(Create), new { id = habitId }, habitId);
+        public HabitsController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<Guid>> Create(CreateHabitCommand command, CancellationToken cancellationToken)
+        {
+            var habitId = await _mediator.Send(command, cancellationToken);
+            return CreatedAtAction(nameof(GetById), new { id = habitId }, habitId);
+        }
+
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<HabitDto>> GetById(Guid id, CancellationToken cancellationToken)
+        {
+            var habit = await _mediator.Send(new GetHabitByIdQuery { Id = id }, cancellationToken);
+            return habit is null ? NotFound() : Ok(habit);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<List<HabitDto>>> GetAll([FromQuery] Guid userId, CancellationToken cancellationToken)
+        {
+            var habits = await _mediator.Send(new GetAllHabitsQuery { UserId = userId }, cancellationToken);
+            return Ok(habits);
+        }
     }
 }
